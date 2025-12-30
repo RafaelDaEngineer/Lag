@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 
 # Change to your project name
-project(SimpleJucePluginTemplate VERSION 0.0.1)
+project(Lag VERSION 0.0.1)
 
 
 set(CMAKE_CXX_STANDARD 23)
@@ -48,9 +48,9 @@ juce_add_plugin(${PROJECT_NAME}
         JUCE_VST3_CAN_REPLACE_VST2 FALSE
         COPY_PLUGIN_AFTER_BUILD TRUE
         PLUGIN_MANUFACTURER_CODE Rafa
-        PLUGIN_CODE Reg0
+        PLUGIN_CODE Dlay
         FORMATS VST3 AU Standalone
-        PRODUCT_NAME "PluginTemplate"
+        PRODUCT_NAME "Lag"
 )
 
 # How we want our SourceFiles to appear in our IDE
