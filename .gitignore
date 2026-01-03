@@ -101,3 +101,6 @@ JuceLibraryCode/
 *.component
 *.component/
 *.vst/
+
+# Ignore JUCE AudioPluginHost saved states
+*.filtergraph
