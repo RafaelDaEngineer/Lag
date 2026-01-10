@@ -1,6 +1,8 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
+#include "Parameters.h"
+
 
 //==============================================================================
 class DelayAudioProcessor final : public juce::AudioProcessor {
@@ -42,6 +44,10 @@ public:
   void setStateInformation(const void* data, int sizeInBytes) override;
 
 private:
+
+  juce::AudioProcessorValueTreeState apvts{*this, nullptr, "Parameters",
+                                           Parameters::createParameterLayout()};
+  Parameters params;
   //==============================================================================
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayAudioProcessor)
 };

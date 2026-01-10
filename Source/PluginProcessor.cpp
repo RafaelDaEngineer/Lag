@@ -5,13 +5,10 @@
 DelayAudioProcessor::DelayAudioProcessor()
     : AudioProcessor(
           BusesProperties()
-#if !JucePlugin_IsMidiEffect
-#if !JucePlugin_IsSynth
               .withInput("Input", juce::AudioChannelSet::stereo(), true)
-#endif
-              .withOutput("Output", juce::AudioChannelSet::stereo(), true)
-#endif
-      ) {
+              .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
+      params(apvts) {
+  // do nothing
 }
 
 DelayAudioProcessor::~DelayAudioProcessor() {}
@@ -76,6 +73,8 @@ void DelayAudioProcessor::prepareToPlay(double sampleRate,
   // Use this method as the place to do any pre-playback
   // initialisation that you need..
   juce::ignoreUnused(sampleRate, samplesPerBlock);
+  params.prepareToPlay(sampleRate);
+  params.reset();
 }
 
 void DelayAudioProcessor::releaseResources() {
@@ -97,32 +96,22 @@ void DelayAudioProcessor::processBlock(
   auto totalNumInputChannels = getTotalNumInputChannels();
   auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-  // In case we have more outputs than inputs, this code clears any output
-  // channels that didn't contain input data, (because these aren't
-  // guaranteed to be empty - they may contain garbage).
-  // This is here to avoid people getting screaming feedback
-  // when they first compile a plugin, but obviously you don't need to keep
-  // this code if your algorithm always overwrites all the output channels.
   for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
     buffer.clear(i, 0, buffer.getNumSamples());
 
-  // This is the place where you'd normally do the guts of your plugin's
-  // audio processing...
-  // Make sure to reset the state if your inner loop is processing
-  // the samples and the outer loop is handling the channels.
-  // Alternatively, you can process the samples with the channels
-  // interleaved by keeping the same state.
-  float gainInDecibels = -6.0f;
+ params.update();
 
-  float gain = juce::Decibels::decibelsToGain(gainInDecibels);
+  float* channelDataL = buffer.getWritePointer(0);
+  float* channelDataR = buffer.getWritePointer(1);
 
-  for (int channel = 0; channel < totalNumInputChannels; ++channel) {
-    auto* channelData = buffer.getWritePointer(channel);
+  float gain = params.gain;
 
-    for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
-      channelData[sample] *= gain;
-    }
-  }
+ for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+   params.smoothen();
+
+   channelDataL[sample] *= params.gain;
+   channelDataR[sample] *= params.gain;
+ }
 }
 
 //==============================================================================
@@ -139,7 +128,8 @@ void DelayAudioProcessor::getStateInformation(juce::MemoryBlock& destData) {
   // You should use this method to store your parameters in the memory block.
   // You could do that either as raw data, or use the XML or ValueTree classes
   // as intermediaries to make it easy to save and load complex data.
-  juce::ignoreUnused(destData);
+  copyXmlToBinary(*apvts.copyState().createXml(), destData);
+  // DBG(apvts.copyState().toXmlString());
 }
 
 void DelayAudioProcessor::setStateInformation(const void* data,
@@ -147,11 +137,25 @@ void DelayAudioProcessor::setStateInformation(const void* data,
   // You should use this method to restore your parameters from this memory
   // block, whose contents will have been created by the getStateInformation()
   // call.
-  juce::ignoreUnused(data, sizeInBytes);
+  std::unique_ptr<juce::XmlElement> xml(getXmlFromBinary(data, sizeInBytes));
+  if (xml.get() != nullptr && xml->hasTagName(apvts.state.getType())) {
+    apvts.replaceState(juce::ValueTree::fromXml(*xml));
+  }
 }
 
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
   return new DelayAudioProcessor();
+}
+
+juce::AudioProcessorValueTreeState::ParameterLayout
+Parameters::createParameterLayout() {
+  juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+  layout.add(std::make_unique<juce::AudioParameterFloat>(
+      gainParamID, "Output Gain", juce::NormalisableRange<float>{-12.0f, 12.0f},
+      0.0f));
+
+  return layout;
 }

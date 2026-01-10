@@ -35,6 +35,8 @@ set(SourceFiles
         Source/PluginEditor.h
         Source/PluginProcessor.cpp
         Source/PluginProcessor.h
+        Source/Parameters.cpp
+        Source/Parameters.h
 )
 
 # Change these to your own preferences
