@@ -75,6 +75,19 @@ void DelayAudioProcessor::prepareToPlay(double sampleRate,
   juce::ignoreUnused(sampleRate, samplesPerBlock);
   params.prepareToPlay(sampleRate);
   params.reset();
+  juce::dsp::ProcessSpec spec;
+  spec.sampleRate = sampleRate;
+  spec.maximumBlockSize = juce::uint32(samplesPerBlock);
+  spec.numChannels = 2;
+
+  delayLine.prepare(spec);
+
+  double numSamples = Parameters::maxDelayTime / 1000.0 * sampleRate;
+  int maxDelayInSamples = int(std::ceil(numSamples));
+  delayLine.setMaximumDelayInSamples(maxDelayInSamples);
+  delayLine.reset();
+
+  // DBG(maxDelayInSamples);
 }
 
 void DelayAudioProcessor::releaseResources() {
@@ -99,19 +112,35 @@ void DelayAudioProcessor::processBlock(
   for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
     buffer.clear(i, 0, buffer.getNumSamples());
 
- params.update();
+  params.update();
 
+  float sampleRate = float(getSampleRate());
   float* channelDataL = buffer.getWritePointer(0);
   float* channelDataR = buffer.getWritePointer(1);
 
   float gain = params.gain;
 
- for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
-   params.smoothen();
+  for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+    params.smoothen();
 
-   channelDataL[sample] *= params.gain;
-   channelDataR[sample] *= params.gain;
- }
+    float delayInSamples = params.delayTime / 1000.0f * sampleRate;
+    delayLine.setDelay(delayInSamples);
+
+    float dryL = channelDataL[sample];
+    float dryR = channelDataR[sample];
+
+    delayLine.pushSample(0, dryL);
+    delayLine.pushSample(1, dryR);
+
+    float wetL = delayLine.popSample(0);
+    float wetR = delayLine.popSample(1);
+
+    float mixL = dryL + wetL * gain;
+    float mixR = dryR + wetR * gain;
+
+    channelDataL[sample] = mixL * params.gain;
+    channelDataR[sample] = mixR * params.gain;
+  }
 }
 
 //==============================================================================
@@ -147,15 +176,4 @@ void DelayAudioProcessor::setStateInformation(const void* data,
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
   return new DelayAudioProcessor();
-}
-
-juce::AudioProcessorValueTreeState::ParameterLayout
-Parameters::createParameterLayout() {
-  juce::AudioProcessorValueTreeState::ParameterLayout layout;
-
-  layout.add(std::make_unique<juce::AudioParameterFloat>(
-      gainParamID, "Output Gain", juce::NormalisableRange<float>{-12.0f, 12.0f},
-      0.0f));
-
-  return layout;
 }
