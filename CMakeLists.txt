@@ -24,9 +24,9 @@ include(${CPM_DOWNLOAD_LOCATION})
 
 # Bring in JUCE locally
 CPMAddPackage(
-    NAME juce
-    GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
-    GIT_TAG origin/master
+        NAME juce
+        GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+        GIT_TAG origin/master
 )
 
 # Make sure you include any new source files here
@@ -37,6 +37,8 @@ set(SourceFiles
         Source/PluginProcessor.h
         Source/Parameters.cpp
         Source/Parameters.h
+        Source/RotaryKnob.cpp
+        Source/RotaryKnob.h
 )
 
 # Change these to your own preferences
@@ -63,7 +65,7 @@ target_sources(${PROJECT_NAME} PRIVATE ${SourceFiles})
 
 # These are some toggleable options from the JUCE CMake API
 target_compile_definitions(${PROJECT_NAME}
-    PUBLIC
+        PUBLIC
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0
         JUCE_VST3_CAN_REPLACE_VST2=0
