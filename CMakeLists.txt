@@ -39,6 +39,8 @@ set(SourceFiles
         Source/Parameters.h
         Source/RotaryKnob.cpp
         Source/RotaryKnob.h
+        Source/LookAndFeel.cpp
+        Source/LookAndFeel.h
 )
 
 # Change these to your own preferences
@@ -55,6 +57,13 @@ juce_add_plugin(${PROJECT_NAME}
         PLUGIN_CODE Dlay
         FORMATS VST3 AU Standalone
         PRODUCT_NAME "Lag"
+)
+
+juce_add_binary_data(Assets
+        SOURCES
+        Assets/Lato-Medium.ttf
+        Assets/Logo.png
+        Assets/Noise.png
 )
 
 # How we want our SourceFiles to appear in our IDE
@@ -87,5 +96,7 @@ target_link_libraries(${PROJECT_NAME}
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags
+        PRIVATE
+        Assets
 )
 

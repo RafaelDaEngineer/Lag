@@ -1,9 +1,10 @@
 #pragma once
 
+#include "LookAndFeel.h"
 #include "Parameters.h"
 #include "PluginProcessor.h"
 #include "RotaryKnob.h"
-#include "juce_gui_basics/juce_gui_basics.h"
+#include <juce_gui_basics/juce_gui_basics.h>
 
 //==============================================================================
 class AudioPluginAudioProcessorEditor final
@@ -23,9 +24,11 @@ private:
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessorEditor)
 
-  RotaryKnob gainKnob{"Gain", processorRef.apvts, gainParamID};
+  RotaryKnob gainKnob{"Gain", processorRef.apvts, gainParamID, true};
   RotaryKnob mixKnob{"Mix", processorRef.apvts, mixParamID};
   RotaryKnob delayTimeKnob{"Time", processorRef.apvts, delayTimeParamID};
 
   juce::GroupComponent delayGroup, feedbackGroup, outputGroup;
+
+  MainLookAndFeel mainLF;
 };

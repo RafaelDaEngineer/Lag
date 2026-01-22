@@ -1,4 +1,6 @@
 #include "PluginEditor.h"
+
+#include "BinaryData.h"
 #include "PluginProcessor.h"
 
 //==============================================================================
@@ -22,15 +24,37 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(
   // Make sure that before the constructor has finished, you've set the
   // editor's size to whatever you need it to be.
   setSize(500, 330);
+
+  setLookAndFeel(&mainLF);
+
+  // gainKnob.slider.setColour(juce::Slider::rotarySliderFillColourId,juce::Colours::green);
 }
 
-AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor() {}
+AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor() {
+  setLookAndFeel(nullptr);
+}
 
 //==============================================================================
 void AudioPluginAudioProcessorEditor::paint(juce::Graphics& g) {
   // (Our component is opaque, so we must completely fill the background with a
   // solid colour)
-  g.fillAll(juce::Colours::darkgrey);
+  auto noise = juce::ImageCache::getFromMemory(BinaryData::Noise_png,
+                                               BinaryData::Noise_pngSize);
+  auto fillType = juce::FillType(noise, juce::AffineTransform::scale(0.5f));
+  g.setFillType(fillType);
+  g.fillRect(getLocalBounds());
+
+  auto rect = getLocalBounds().withHeight(40);
+  g.setColour(Colors::header);
+  g.fillRect(rect);
+
+  auto image = juce::ImageCache::getFromMemory(BinaryData::Logo_png,
+                                               BinaryData::Logo_pngSize);
+
+  int destWidth = image.getWidth() / 2;
+  int destHeight = image.getHeight() / 2;
+  g.drawImage(image, getWidth() / 2 - destWidth / 2, 0, destWidth, destHeight,
+              0, 0, image.getWidth(), image.getHeight());
 }
 
 void AudioPluginAudioProcessorEditor::resized() {
@@ -38,8 +62,8 @@ void AudioPluginAudioProcessorEditor::resized() {
   // subcomponents in your editor..
   auto bounds = getLocalBounds();
 
-  int y = 10;
-  int height = bounds.getHeight() - 20;
+  int y = 50;
+  int height = bounds.getHeight() - 60;
 
   // Position the groups
   delayGroup.setBounds(10, y, 110, height);
