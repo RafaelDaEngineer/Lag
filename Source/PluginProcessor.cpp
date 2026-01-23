@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "ProtectYourEars.h"
 
 //==============================================================================
 DelayAudioProcessor::DelayAudioProcessor()
@@ -87,6 +88,9 @@ void DelayAudioProcessor::prepareToPlay(double sampleRate,
   delayLine.setMaximumDelayInSamples(maxDelayInSamples);
   delayLine.reset();
 
+  feedbackL = 0.0f;
+  feedbackR = 0.0f;
+
   // DBG(maxDelayInSamples);
 }
 
@@ -129,11 +133,18 @@ void DelayAudioProcessor::processBlock(
     float dryL = channelDataL[sample];
     float dryR = channelDataR[sample];
 
-    delayLine.pushSample(0, dryL);
-    delayLine.pushSample(1, dryR);
+    delayLine.pushSample(0, dryL + feedbackL);
+    delayLine.pushSample(1, dryR + feedbackR);
 
     float wetL = delayLine.popSample(0);
     float wetR = delayLine.popSample(1);
+
+    // multitap delay (potenital add in the future)
+    // wetL += delayLine.popSample(0, delayInSamples * 2.0f, false) * 0.7f;
+    // wetR += delayLine.popSample(0, delayInSamples * 2.0f, false) * 0.7f;
+
+    feedbackL = wetL * params.feedback;
+    feedbackR = wetR * params.feedback;
 
     float mixL = dryL + wetL * gain;
     float mixR = dryR + wetR * gain;
@@ -141,6 +152,9 @@ void DelayAudioProcessor::processBlock(
     channelDataL[sample] = mixL * params.gain;
     channelDataR[sample] = mixR * params.gain;
   }
+#if JUCE_DEBUG
+  protectYourEars(buffer);
+#endif
 }
 
 //==============================================================================

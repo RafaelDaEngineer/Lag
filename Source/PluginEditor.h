@@ -27,6 +27,8 @@ private:
   RotaryKnob gainKnob{"Gain", processorRef.apvts, gainParamID, true};
   RotaryKnob mixKnob{"Mix", processorRef.apvts, mixParamID};
   RotaryKnob delayTimeKnob{"Time", processorRef.apvts, delayTimeParamID};
+  RotaryKnob feedbackKnob{"Feedback", processorRef.apvts, feedbackParamID,
+                          true};
 
   juce::GroupComponent delayGroup, feedbackGroup, outputGroup;
 

@@ -41,6 +41,7 @@ set(SourceFiles
         Source/RotaryKnob.h
         Source/LookAndFeel.cpp
         Source/LookAndFeel.h
+        Source/ProtectYourEars.h
 )
 
 # Change these to your own preferences
