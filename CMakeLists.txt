@@ -42,6 +42,7 @@ set(SourceFiles
         Source/LookAndFeel.cpp
         Source/LookAndFeel.h
         Source/ProtectYourEars.h
+        Source/DSP.h
 )
 
 # Change these to your own preferences

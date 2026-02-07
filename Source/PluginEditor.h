@@ -29,6 +29,7 @@ private:
   RotaryKnob delayTimeKnob{"Time", processorRef.apvts, delayTimeParamID};
   RotaryKnob feedbackKnob{"Feedback", processorRef.apvts, feedbackParamID,
                           true};
+  RotaryKnob stereoKnob{"Stereo", processorRef.apvts, stereoParamID, true};
 
   juce::GroupComponent delayGroup, feedbackGroup, outputGroup;
 
