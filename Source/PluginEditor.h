@@ -30,6 +30,8 @@ private:
   RotaryKnob feedbackKnob{"Feedback", processorRef.apvts, feedbackParamID,
                           true};
   RotaryKnob stereoKnob{"Stereo", processorRef.apvts, stereoParamID, true};
+ RotaryKnob lowCutKnob{"Low Cut", processorRef.apvts, lowCutParamID};
+  RotaryKnob highCutKnob{"High Cut", processorRef.apvts, highCutParamID};
 
   juce::GroupComponent delayGroup, feedbackGroup, outputGroup;
 
